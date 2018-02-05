@@ -1,40 +1,68 @@
 //Fertility pong
-
-//Had to make some adjustments that caused other problems
-//When a ball colides with the paddle, it creates a new ball in that same position
-//However, sometimes the duplicate balls would get stuck and would create way too many more balls 
-//I had to make some adjustments to create the balls enough away from the paddles that this doesn't happen
-//However, that causes the balls to occaisanlly move in the opposite way
-
 Paddle p1;
 Paddle p2;
 Ball b;
 int counterP1;
 int counterP2;
+int positive = 1;
+int negative = -1;
+
 boolean p1Up = false;
 boolean p1Down = false;
 boolean p2Up = false;
 boolean p2Down = false;
+
+boolean rightPaddleCollision;
+boolean leftPaddleCollision;
+
 PVector middle;
+
+PVector leftPaddle;
+PVector rightPaddle;
+
 BallSystem bs;
 color p1Red = color (120, 220, 250);
 color p2Blue = color(250, 90, 70);
 
+PImage [] dems = new PImage[5];
+PImage [] reps = new PImage[5];
+
+
 void setup() {
   size(1000, 700);
   noStroke();
-  p1 = new Paddle (50, height/2 + 30, p1Red);
-  p2 = new Paddle (width - 50, height/2 + 30, p2Blue);
+  smooth(16);
+  leftPaddle = new PVector(50, height/2 + 30);
+  rightPaddle = new PVector (width - 50, height/2 + 30);
+
+  p1 = new Paddle (leftPaddle, p1Red);
+  p2 = new Paddle (rightPaddle, p2Blue);
+  
+  for (int i = 0; i < dems.length; i ++) {
+    dems[i] = loadImage("dem" + i + ".png");
+    reps[i] = loadImage("rep" + i + ".png");
+  }
 
   bs = new BallSystem();
   middle = new PVector(width/2, height/2);
-  bs.addBall(middle);
+  int i = int(random(1));
+  if (i == 0) {
+    i = -1;
+  } else if (i == 1) {
+    i = 1;
+  }
+  bs.addBall(middle, i);
+ 
 }
 
 void  draw() {
   background(255); 
+  fill(p2Blue);
+  rectMode(CORNER);
+  rect(0, 0, width/2, height);
+  fill(p1Red);
+  rect( width/2, 0, width/2, height); 
   bs.run();
-
 
   textSize(40);
   fill(p1Red);
@@ -42,11 +70,11 @@ void  draw() {
   fill(p2Blue);
   text(counterP2, width - 200, 100);
 
-  //LINE IN THE MIDDLE
-  for (int i = 0; i < height/20; i ++) {
-    fill(0);
-    rect( width/2 - 3, i * 35, 6, 16);
-  }
+  ////LINE IN THE MIDDLE
+  //for (int i = 0; i < height/20; i ++) {
+  //  fill(0);
+  //  rect( width/2 - 3, i * 35, 6, 16);
+  //}
 
   p1.display();
   p2.display();
@@ -57,7 +85,7 @@ void  draw() {
   if (p2Up == true && p2.y > 0) {
     p2.moveUp();
   }
-  if (p1Down == true && p1.y < (height - p1.h)) {
+  if (p1Down == true && p1.y < height - p1.h) {
     p1.moveDown();
   }
   if (p2Down == true && p2.y < (height - p2.h)) {
@@ -65,11 +93,13 @@ void  draw() {
   }
 
   if ( counterP1 > 9) {
-    bs.gameEnd(p1Red);
+    String s = "PLAYER 1";
+    bs.gameEnd(s);
   }
 
   if ( counterP2 > 9) {
-    bs.gameEnd(p2Blue);
+    String s = "PLAYER 2";
+    bs.gameEnd(s);
   }
 }
 
@@ -109,9 +139,3 @@ void keyReleased() {
     p1Down = false;
   }
 }
-
-//SPAWNING
-//Need to keep the balls in an ArrayList
-//When a ball collides with a paddle, it adds another to the ArrayList and makes it in the same direction as the other one
-//when it leaves remove from arraylist 
-//if arraylist length = 0, start add a new ball at the center 
