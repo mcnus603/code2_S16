@@ -24,9 +24,6 @@ BallSystem bs;
 color p1Red = color (120, 220, 250);
 color p2Blue = color(250, 90, 70);
 
-PImage [] dems = new PImage[5];
-PImage [] reps = new PImage[5];
-
 
 void setup() {
   size(1000, 700);
@@ -37,11 +34,7 @@ void setup() {
 
   p1 = new Paddle (leftPaddle, p1Red);
   p2 = new Paddle (rightPaddle, p2Blue);
-  
-  for (int i = 0; i < dems.length; i ++) {
-    dems[i] = loadImage("dem" + i + ".png");
-    reps[i] = loadImage("rep" + i + ".png");
-  }
+
 
   bs = new BallSystem();
   middle = new PVector(width/2, height/2);
@@ -52,7 +45,6 @@ void setup() {
     i = 1;
   }
   bs.addBall(middle, i);
- 
 }
 
 void  draw() {
@@ -69,12 +61,6 @@ void  draw() {
   text(counterP1, 200, 100);
   fill(p2Blue);
   text(counterP2, width - 200, 100);
-
-  ////LINE IN THE MIDDLE
-  //for (int i = 0; i < height/20; i ++) {
-  //  fill(0);
-  //  rect( width/2 - 3, i * 35, 6, 16);
-  //}
 
   p1.display();
   p2.display();

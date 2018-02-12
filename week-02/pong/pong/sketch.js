@@ -1,4 +1,11 @@
 
+//For spawning game, should probably collision check in ball
+//then ball reverse function
+//Convert exerything to PVector 
+
+
+
+
 var p1Red;
 var p2Blue;
 
@@ -62,62 +69,71 @@ function draw() {
 	rect(0, 0, width/2, height);
 	fill(p1Red);
 	rect( width/2, 0, width/2, height);
-	
-	
-	ball.collision();
-	ball.display();
-	
-	textSize(40);
-	fill(p1Red);
-	text(str(counterP1), 200, 100);
-	fill(p2Blue);
-	text(str(counterP2), width - 200, 100);
 
-	if (p1Up) {
-		p1.moveUp();
-	}
-	if (p2Up) {
-		p2.moveUp();
-	}
-	if (p1Down) {
-		p1.moveDown();
-	}
-	if (p2Down) {
-		p2.moveDown();
-	}
+//for however balls are in the array, loop through and check collisions 
+checkCollision(b, p1);
+checkCollision(b, p2);
 
-	p1.display();
-	p2.display();	
+textSize(40);
+fill(p1Red);
+text(str(counterP1), 200, 100);
+fill(p2Blue);
+text(str(counterP2), width - 200, 100);
+
+if (p1Up) {
+	p1.moveUp();
+}
+if (p2Up) {
+	p2.moveUp();
+}
+if (p1Down) {
+	p1.moveDown();
+}
+if (p2Down) {
+	p2.moveDown();
+}
+
+p1.display();
+p2.display();	
 
 
-	if (counterP1 > 9) {
-		var s = "PLAYER 1";
-		endGame(s);
-	}
-	if (counterP2 > 9) {
-		var s = "PLAYER 2";
-		endGame(s);
-	}
+if (counterP1 > 9) {
+	var s = "PLAYER 1";
+	endGame(s);
+}
+if (counterP2 > 9) {
+	var s = "PLAYER 2";
+	endGame(s);
+}
 
 }
 
+function checkCollision(ball, paddle) {
+	if (ball.pos.x > paddle.pos.x && ball.pos.x < paddle.pos.x + paddle.width ||
+		ball.pos.y > paddle.pos.y && ball.pos.y + paddle.height) {
+		ball.vel.x *= -1;
+}
+}
+
 //Paddle Class
-function Paddle(pos, c) {
-	var x; 
-	var y;
-	var w = 20;
-	var h = 100;
-	this.display = function () {
-		fill(c);
-		rect(pos.x, pos.y, w, h);
-		x = pos.x;
-		y = pos.y;
+function Paddle(num) {
+	this.pos = createVector(0,0);
+	this.vel = createVector(0,5);
+	this.w = 20;
+	this.h = 100;
+
+	this.display = function (color) {
+		fill(color);
+		rect(this.pos.x, this.pos.y, this.w, this.h);
 	}
+	this.update = function() {
+		
+	}
+
 	this.moveUp = function() {
 		if (pos.y > 0) {
 			pos.y -= 5;	
 		}
-		
 	}
 	this.moveDown = function() {
 		if (pos.y < height - h) {
@@ -128,106 +144,111 @@ function Paddle(pos, c) {
 
 
 //Ball Class
-class Ball{
-	constructor() {
-		this.x = width/2;
-		this.y = height/2;
-		this.dx = 4;  
-		this.dy =  random(1,-1);
+function Ball(){
+	this.pos = createVector(width/2, height/2);
+	this.vel = createVector(0, random(-5, 5));
+
+	var r = random();
+
+	if(r < 0.5) {
+		this.vel.x = random(1, 5);
+	} else {
+		this.vel.x = random(-5, -1);
 	}
 
-	display(){
+	this.update = function () {
+		if (this.pos.x < this.s/2 || this.pos.x > width - this.s/2) {
+			this.vel.x *= -1;
+		}
+		if (this.pos.y < this.s/2 || this.pos.y > height - this.s/2) {
+			this.vel.y *= -1;
+		}
+
+		this.pos.add(this.vel);
+	}
+
+	this.display = function() {
 		noStroke();
+		fill(255);
 		fill(map(this.x, width, 0, 255, 0), map(this.x, 0, width, 200, 44), map(this.x, 0, width, 255, 0));
-		rectMode(CENTER);
-		rect(this.x, this.y, s, s);
-		this.x += this.dx;
-		this.y += this.dy;
-
-		if (this.x < 0) {
-			counterP2++;
-			this.x = width/2;
-			this.y = height/2;
-			this.dx = -this.dx;  
-			this.dy = random(1,-1);
-		}
-
-		if (this.x > width) {
-			counterP2++;
-			this.x = width/2;
-			this.y = height/2;
-			this.dx = -this.dx;  
-			this.dy = random(2,-2);
-		}
-
-		if (this.y < 0 || this.y > height) {
-			this.dy *= -1;
-			this.y += this.dy;
-		} else { 
-			this.y += this.dy;
-		}
+		rect(this.pos.x, this.pos.y, this.s, this.s);
 	}
 
-	collision() {
-		if (this.x > p1.x && this.x < (p1.x + p1.w) && this.y > p1.y && this.y < (p1.y +p1.h)) {
-			this.dx *= -1;
-			this.dy *= -1;
-		}
-		if (this.x > p2.x && this.x < p2.x + p2.w && this.y > p2.y && this.y < (p2.y +p2.h)) {
+// this.display(){
+// 	noStroke();
+// 	rectMode(CENTER);
+// 	rect(this.x, this.y, s, s);
+// 	this.x += this.dx;
+// 	this.y += this.dy;
 
-			this.dx *= -1;
-			this.dy *= -1;
+// 	if (this.x < 0) {
+// 		counterP2++;
+// 		this.x = width/2;
+// 		this.y = height/2;
+// 		this.dx = -this.dx;  
+// 		this.dy = random(1,-1);
+// 	}
 
-		}
-		this.x += this.dx;
-		this.y += this.dy;
-	} 	
+// 	if (this.x > width) {
+// 		counterP2++;
+// 		this.x = width/2;
+// 		this.y = height/2;
+// 		this.dx = -this.dx;  
+// 		this.dy = random(2,-2);
+// 	}
+
+// 	if (this.y < 0 || this.y > height) {
+// 		this.dy *= -1;
+// 		this.y += this.dy;
+// 	} else { 
+// 		this.y += this.dy;
+// 	}	
 }
 
 
-  	//Ball System Class
-  	
+	//Ball System Class
+	
 
-  	function keyPressed() {
-  		if (key === 'W') {
-  			p1Up = true;
-  		}
-  		if (key === 'S') {
-  			p1Down = true;
-  		}
-  		if (keyCode === UP_ARROW) {
-  			p2Up = true;
-  		}
-  		if (keyCode === DOWN_ARROW) {
-  			p2Down = true;
-  		}
-  	}
+	function keyPressed() {
+		if (key === 'W') {
+			p1Up = true;
+		}
+		if (key === 'S') {
+			p1Down = true;
+		}
+		if (keyCode === UP_ARROW) {
+			p2Up = true;
+		}
+		if (keyCode === DOWN_ARROW) {
+			p2Down = true;
+		}
+	}
 
-  	function keyReleased() {
-  		if (key === 'W') {
-  			p1Up = false;
-  		}
-  		if (key === 'S') {
-  			p1Down = false;
-  		}
+	function keyReleased() {
+		if (key === 'W') {
+			p1Up = false;
+		}
+		if (key === 'S') {
+			p1Down = false;
+		}
 
-  		if (keyCode === UP_ARROW) {
-  			p2Up = false;
-  		}
-  		if (keyCode === DOWN_ARROW) {
-  			p2Down = false;
-  		}
-  	}
+		if (keyCode === UP_ARROW) {
+			p2Up = false;
+		}
+		if (keyCode === DOWN_ARROW) {
+			p2Down = false;
+		}
+	}
 
-  	function endGame (s) {
-  		rectMode(CENTER);
-  		fill(255);
-  		rect(width/2, height/2, 400, 300);
-  		fill(0);
-  		textSize(24);
-  		textAlign(CENTER);
-  		text(s + " IS THE WINNER", width/2, height/2)
-  	}
+	function endGame (s) {
+		rectMode(CENTER);
+		fill(255);
+		rect(width/2, height/2, 400, 300);
+		fill(0);
+		textSize(24);
+		textAlign(CENTER);
+		text(s + " IS THE WINNER", width/2, height/2)
+	}
 
 
 
